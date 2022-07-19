@@ -3,25 +3,19 @@ import time
 import tkinter as tk
 
 py_serial = serial.Serial(port="/dev/cu.usbserial-1140",baudrate = 9600) # 아두이노 시리얼 포트정보 입력
-
+condition = True
 
 # 솔레노이드 밸브 #1
 # 솔레노이드 밸브 #1 켜기(열기)
 def valve_1_open() :
     cmd = "a"
     py_serial.write(cmd.encode())
-    time.sleep(1)
-    res = py_serial.readline()
-    res = res[:len(res)-1].decode()
-    valve_1_chk(res)
+    time.sleep(0.1)
 # 솔레노이드 밸브 #1 끄기(닫기)
 def valve_1_close() :
     cmd = "b"
     py_serial.write(cmd.encode())
-    time.sleep(1)
-    res = py_serial.readline()
-    res = res[:len(res) - 1].decode()
-    valve_1_chk(res)
+    time.sleep(0.1)
 # 솔레노이드 밸브 #1 상태 점검
 def valve_1_chk(res) :
     res = int(res)
@@ -38,21 +32,14 @@ def valve_1_chk(res) :
 def valve_2_open() :
     cmd = "c"
     py_serial.write(cmd.encode())
-    time.sleep(1)
-    res = py_serial.readline()
-    res = res[:len(res)-1].decode()
-    valve_2_chk(res)
+    time.sleep(0.1)
 # 솔레노이드 밸브 #2 끄기(닫기)
 def valve_2_close() :
     cmd = "d"
     py_serial.write(cmd.encode())
-    time.sleep(1)
-    res = py_serial.readline()
-    res = res[:len(res) - 1].decode()
-    valve_2_chk(res)
+    time.sleep(0.1)
 # 솔레노이드 밸브 #2 상태 점검
 def valve_2_chk(res) :
-
     res = int(res)
     if res == 0 :
         valve_2_status = tk.Label(main_disp,text="OPENED", fg="blue", bg="white")
@@ -67,20 +54,12 @@ def valve_2_chk(res) :
 def interval_open() :
     cmd = "e"
     py_serial.write(cmd.encode())
-    time.sleep(0.5)
-    res = py_serial.readline()
-    res = res[:len(res)-1].decode()
-    print(res)
-    interval_chk(res)
+    time.sleep(0.1)
 # 구간 닫힘
 def interval_close() :
     cmd = "f"
     py_serial.write(cmd.encode())
-    time.sleep(0.5)
-    res = py_serial.readline()
-    res = res[:len(res)-1].decode()
-    print(res)
-    interval_chk(res)
+    time.sleep(0.1)
 # 구간 상태 점검
 def interval_chk(res) :
     res = int(res)
@@ -90,6 +69,28 @@ def interval_chk(res) :
     elif res == 1 :
         interval_status = tk.Label(main_disp, text="CLOSED", bg="white", fg="red")
         interval_status.grid(row=1, column=1)
+
+# 상태 항시 점검
+def chk_alltime() :
+
+    if condition :
+        st_line = py_serial.readline()
+        st_line = st_line[:len(st_line) - 1].decode()
+        v1_stat = int(st_line[8])
+        v2_stat = int(st_line[17])
+        print(v1_stat, v2_stat)
+        valve_1_chk(v1_stat)
+        valve_2_chk(v2_stat)
+
+        if v1_stat == 0 and v2_stat == 0:  # 구간 개방
+            interval_chk(0)
+        elif v1_stat == 1 and v2_stat == 1:  # 구간 폐쇄
+            interval_chk(1)
+        elif v1_stat != v2_stat :
+            interval_status = tk.Label(main_disp, text="WRONG", bg="red", fg="white")
+            interval_status.grid(row=1, column=1)
+
+        main_disp.after(100, chk_alltime)
 
 
 # tkinter GUI 구성
@@ -148,6 +149,8 @@ valve_2_on_button = tk.Button(main_disp, text="Valve #2 OPEN", command=valve_2_o
 valve_2_on_button.grid(row=6, column=1)
 valve_2_off_button = tk.Button(main_disp, text="Valve #2 CLOSE", command=valve_2_close)
 valve_2_off_button.grid(row=7, column=1)
+
+main_disp.after(100, chk_alltime)
 
 main_disp.mainloop()
 
