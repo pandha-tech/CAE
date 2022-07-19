@@ -4,11 +4,20 @@ import tkinter as tk
 
 py_serial = serial.Serial(port="/dev/cu.usbserial-1140",baudrate = 9600) # 아두이노 시리얼 포트정보 입력
 
-# 솔레노이드 밸브 #1 작동상태 점검
-def chk_valve_1() :
+# 솔레노이드 밸브 #1 켜기
+def valve_1_on() :
 
+    global valve_1_status
+    cmd = "a"
+    py_serial.write(cmd.encode())
+    time.sleep(0.1)
+    res = py_serial.readline()
 
+    if res == "0" :
+        valve_1_status = "OPENED"
 
+    elif res == "1" :
+        valve_1_status = "CLOSED"
 
 
 
@@ -43,8 +52,8 @@ def main_disp() :
     #솔레노이드 밸브 #1 : 릴레이 CH2
     valve_1_label = tk.Label(main_disp, text="Valve #1 Status :")
     valve_1_label.grid(row=2, column=0)
-    valve_1_status = tk.Label(main_disp, text="NORMAL", bg="white", fg="blue")
-    valve_1_status.grid(row=2, column=1)
+    valve_1_status_label = tk.Label(main_disp, textvariable=valve_1_status, bg="white", fg="blue")
+    valve_1_status_label.grid(row=2, column=1)
 
     #솔레노이드 밸브 #2 : 릴레이 CH3
     valve_2_label = tk.Label(main_disp, text="Valve #2 Status :")
