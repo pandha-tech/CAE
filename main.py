@@ -32,6 +32,34 @@ def valve_1_chk(res) :
         valve_1_status = tk.Label(main_disp, text="CLOSED", fg="red", bg="white")
         valve_1_status.grid(row=2, column=1)
 
+# 솔레노이드 밸브 #2 켜기(열기)
+def valve_2_open() :
+    cmd = "c"
+    py_serial.write(cmd.encode())
+    time.sleep(1)
+    res = py_serial.readline()
+    res = res[:len(res)-1].decode()
+    valve_2_chk(res)
+
+# 솔레노이드 밸브 #2 끄기(닫기)
+def valve_2_close() :
+    cmd = "d"
+    py_serial.write(cmd.encode())
+    time.sleep(1)
+    res = py_serial.readline()
+    res = res[:len(res) - 1].decode()
+    valve_2_chk(res)
+
+# 솔레노이드 밸브 #2 상태 점검
+def valve_2_chk(res) :
+
+    res = int(res)
+    if res == 0 :
+        valve_2_status = tk.Label(main_disp,text="OPENED", fg="blue", bg="white")
+        valve_2_status.grid(row=3, column=1)
+    elif res == 1 :
+        valve_2_status = tk.Label(main_disp, text="CLOSED", fg="red", bg="white")
+        valve_2_status.grid(row=3, column=1)
 
 # tkinter GUI 구성
 main_disp = tk.Tk()
@@ -42,7 +70,7 @@ main_disp.resizable(True, True)
 #변수 선언부
 
 
-
+#Label, Grid
 operation_status_label = tk.Label(main_disp, text="Operation Status :")
 operation_status_label.grid(row=0, column=0, columnspan=3)
 
@@ -66,12 +94,9 @@ interval_status.grid(row=1, column=1)
 valve_1_label = tk.Label(main_disp, text="Valve #1 Status :")
 valve_1_label.grid(row=2, column=0)
 
-
 #솔레노이드 밸브 #2 : 릴레이 CH3
 valve_2_label = tk.Label(main_disp, text="Valve #2 Status :")
 valve_2_label.grid(row=3, column=0)
-valve_2_status = tk.Label(main_disp, text="NORMAL", bg="white", fg="blue")
-valve_2_status.grid(row=3, column=1)
 
 #펌프 : 릴레이 CH4
 pump_label = tk.Label(main_disp, text="Pump Status :")
@@ -89,9 +114,9 @@ valve_1_on_button.grid(row=6, column=0)
 valve_1_off_button = tk.Button(main_disp, text="Valve #1 CLOSE", command=valve_1_close)
 valve_1_off_button.grid(row=7, column=0)
 
-valve_2_on_button = tk.Button(main_disp, text="Valve #2 OPEN")
+valve_2_on_button = tk.Button(main_disp, text="Valve #2 OPEN", command=valve_2_open)
 valve_2_on_button.grid(row=6, column=1)
-valve_2_off_button = tk.Button(main_disp, text="Valve #2 CLOSE")
+valve_2_off_button = tk.Button(main_disp, text="Valve #2 CLOSE", command=valve_2_close)
 valve_2_off_button.grid(row=7, column=1)
 
 main_disp.mainloop()
