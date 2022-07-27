@@ -7,13 +7,6 @@ import numpy as np
 py_serial = serial.Serial(port="/dev/cu.usbserial-1140",baudrate = 9600) # 아두이노 시리얼 포트정보 입력
 condition = True
 
-pres_stat_list = []
-temp_stat_list = []
-pres_stat_index = 0
-for value in range(1000) :
-    pres_stat_list.append(round(random.uniform(15,21.3),2))
-    temp_stat_list.append(round(random.uniform(-163,-162),2))
-
 # 솔레노이드 밸브 #1
 # 솔레노이드 밸브 #1 켜기(열기)
 def valve_1_open() :
@@ -114,7 +107,6 @@ def chk_alltime() :
         valve_2_chk(v2_stat)
         pump_chk(pump_stat)
         flow_chk(flowrate_stat)
-        pres_temp_rand()
 
         if v1_stat == 0 and v2_stat == 0:  # 구간 개방
             interval_chk(0)
@@ -133,23 +125,6 @@ def flow_chk(flow) :
     flow_stat.set(flow)
     flow_rate = tk.Label(main_disp, textvariable=flow_stat, bg="white", fg = "blue")
     flow_rate.grid(row=0, column=3)
-
-# 수압, 온도 난수 생성 및 출력
-def pres_temp_rand() :
-
-    for pres_stat_index in range(1000) :
-        pres_stat_value = pres_stat_list[pres_stat_index]
-        pres_stat_value = tk.StringVar()
-        temp_stat_value = temp_stat_list[pres_stat_index]
-        temp_stat_value = tk.StringVar()
-
-        pres_stat = tk.Label(main_disp,textvariable=pres_stat_value, bg="white", fg="blue")
-        pres_stat.grid(row=0, column=5)
-
-        temp_stat = tk.Label(main_disp, textvariable=temp_stat_value, bg="white", fg="blue")
-        temp_stat.grid(row=0,column=7)
-
-
 
 # 테스트 모드
 def test_mode() :
@@ -191,6 +166,21 @@ main_disp.title("CONTROL CONSOLE")
 main_disp.geometry("1000x800")
 main_disp.resizable(True, True)
 
+
+pres_stat_list = []
+temp_stat_list = []
+pres_stat_index = 0
+for value in range(1000) :
+    pres_stat_list.append(round(random.uniform(15,21.3),2))
+    temp_stat_list.append(round(random.uniform(-163,-162),2))
+
+pres_stat_value = tk.StringVar()
+temp_stat_value = tk.StringVar()
+
+for pres_stat_index in range(1000):
+    pres_stat_value.set(pres_stat_list[pres_stat_index])
+    temp_stat_value.set(temp_stat_list[pres_stat_index])
+
 #변수 선언부
 
 
@@ -203,9 +193,13 @@ flow_rate_status_label.grid(row=0, column=2)
 
 pressure_status_label = tk.Label(main_disp, text="Pressure : ")
 pressure_status_label.grid(row=0, column=4)
+pres_stat = tk.Label(main_disp, textvariable=pres_stat_value, bg="white", fg="blue")
+pres_stat.grid(row=0, column=5)
 
 temp_status_label = tk.Label(main_disp, text="Temperature : ")
 temp_status_label.grid(row=0, column=6)
+temp_stat = tk.Label(main_disp, textvariable=temp_stat_value, bg="white", fg="blue")
+temp_stat.grid(row=0, column=7)
 
 interval_label = tk.Label(main_disp, text="Interval #1 Status : ")
 interval_label.grid(row=1, column=0)
@@ -248,6 +242,7 @@ testmode_chk = tk.Checkbutton(main_disp, text = "TEST MODE", command=test_mode)
 testmode_chk.grid(row=1, column = 2)
 
 main_disp.after(1000, chk_alltime)
+
 
 main_disp.mainloop()
 
