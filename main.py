@@ -123,7 +123,7 @@ def flow_chk(flow) :
     flow_stat = tk.StringVar()
     flow_stat.set(flow)
     flow_rate = tk.Label(main_disp, textvariable=flow_stat, bg="white", fg = "blue")
-    flow_rate.grid(row=0, column=3)
+    flow_rate.grid(row=0, column=1)
 
 # 테스트 모드
 def test_mode() :
@@ -205,9 +205,9 @@ def update_pres_temp() :
         temp_stat_value.set(round(random.uniform(-163,-162),2))
 
         pres_stat = tk.Label(main_disp, textvariable=pres_stat_value, bg="white", fg="blue")
-        pres_stat.grid(row=0, column=5)
+        pres_stat.grid(row=0, column=3)
         temp_stat = tk.Label(main_disp, textvariable=temp_stat_value, bg="white", fg="blue")
-        temp_stat.grid(row=0, column=7)
+        temp_stat.grid(row=0, column=5)
 
         main_disp.after(1000,update_pres_temp)
 
@@ -218,17 +218,15 @@ main_disp.geometry("1000x300")
 main_disp.resizable(True, True)
 
 #Label, Grid
-operation_status_label = tk.Label(main_disp, text="Operation Status :")
-operation_status_label.grid(row=0, column=0)
 
 flow_rate_status_label = tk.Label(main_disp, text="Flow rate(L/M) : ")
-flow_rate_status_label.grid(row=0, column=2)
+flow_rate_status_label.grid(row=0, column=0)
 
 pressure_status_label = tk.Label(main_disp, text="Pressure(MPa) : ")
-pressure_status_label.grid(row=0, column=4)
+pressure_status_label.grid(row=0, column=2)
 
 temp_status_label = tk.Label(main_disp, text="Temperature(°C) : ")
-temp_status_label.grid(row=0, column=6)
+temp_status_label.grid(row=0, column=4)
 
 interval_label = tk.Label(main_disp, text="Interval #1 Status : ")
 interval_label.grid(row=1, column=0)
