@@ -162,8 +162,13 @@ def test_mode() :
 
 def test_adj_value() :
 
+    # 정상범위 조건
+    # 유량 : 10 ~ 30 L/Min
+    # 압력 : 0 ~ 21.3 MPa
+    # 온도 : -164 ~ -161 degree of C
+
     # 3개 중 하나라도 이상치가 나오면 차단
-    if float(adj_flow.get()) < 10 or float(adj_pres.get()) > 21.3 or float(adj_temp.get()) > -162:
+    if float(adj_flow.get()) < 10 or float(adj_flow.get()) > 30 or float(adj_pres.get()) < 0 or float(adj_pres.get()) > 21.3 or float(adj_temp.get()) < -164 or float(adj_temp.get()) > -161 :
         adjusted_flow = tk.Label(main_disp, textvariable=adj_flow,bg="white", fg="red")
         adjusted_flow.grid(row=2, column=5)
         adjusted_pres = tk.Label(main_disp, textvariable=adj_pres, bg="white", fg="red")
@@ -175,7 +180,7 @@ def test_adj_value() :
         py_serial.write(cmd.encode())
         time.sleep(0.1)
     # 3개 모두 정상치라면 다시 정상가동
-    elif float(adj_flow.get()) >= 10 and float(adj_pres.get()) <= 21.3 and float(adj_temp.get()) <= -162 :
+    else :
         adjusted_flow = tk.Label(main_disp, textvariable=adj_flow, bg="white", fg="blue")
         adjusted_flow.grid(row=2, column=5)
         adjusted_pres = tk.Label(main_disp, textvariable=adj_pres, bg="white", fg="blue")
@@ -183,11 +188,6 @@ def test_adj_value() :
         adjusted_temp = tk.Label(main_disp, textvariable=adj_temp, bg="white", fg="blue")
         adjusted_temp.grid(row=4, column=5)
         cmd = "e"
-        py_serial.write(cmd.encode())
-        time.sleep(0.1)
-    # 그외의 모든 조건에서 차단
-    else :
-        cmd = "f"
         py_serial.write(cmd.encode())
         time.sleep(0.1)
 
