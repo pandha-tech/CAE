@@ -49,7 +49,6 @@ def valve_2_chk(res) :
         valve_2_status = tk.Label(main_disp, text="CLOSED", fg="red", bg="white")
         valve_2_status.grid(row=3, column=1)
 
-
 # 워터 펌프
 # 워터펌프 켜기
 def pump_on() :
@@ -102,7 +101,6 @@ def chk_alltime() :
         v2_stat = int(st_line[17])
         pump_stat = int(st_line[24])
         flowrate_stat = str(st_line[26:30])
-        #print(v1_stat, v2_stat, flowrate_stat)
         valve_1_chk(v1_stat)
         valve_2_chk(v2_stat)
         pump_chk(pump_stat)
@@ -121,6 +119,7 @@ def chk_alltime() :
 # 유량 점검
 def flow_chk(flow) :
 
+    global flow_stat
     flow_stat = tk.StringVar()
     flow_stat.set(flow)
     flow_rate = tk.Label(main_disp, textvariable=flow_stat, bg="white", fg = "blue")
@@ -129,81 +128,110 @@ def flow_chk(flow) :
 # 테스트 모드
 def test_mode() :
 
-    global adj_flow # 유량 조정값 저장
-    global adj_pres # 수압 조정값 저장
-    global adj_temp # 온도 조정값 저장
+    global adj_flow
+    global adj_pres
+    global adj_temp
+
+    adj_flow = tk.DoubleVar()
+    adj_pres = tk.DoubleVar()
+    adj_temp = tk.DoubleVar()
 
     adj_flow_label = tk.Label(main_disp, text="Flowrate : ")
     adj_flow_label.grid(row=2, column = 2)
-    adj_flow_entry = tk.Entry(main_disp)
+    adj_flow_entry = tk.Entry(main_disp, textvariable=adj_flow)
     adj_flow_entry.grid(row=2, column=3)
-    adj_flow = adj_flow_entry.get()
+    adjusted_flow_label = tk.Label(main_disp, text="Adjusted : ")
+    adjusted_flow_label.grid(row=2, column=4)
 
     adj_pres_label = tk.Label(main_disp, text="Pressure : ")
     adj_pres_label.grid(row=3, column=2)
-    adj_pres_entry = tk.Entry(main_disp)
+    adj_pres_entry = tk.Entry(main_disp, textvariable=adj_pres)
     adj_pres_entry.grid(row=3, column=3)
-    adj_pres = adj_pres_entry.get()
+    adjusted_pres_label = tk.Label(main_disp, text="Adjusted : ")
+    adjusted_pres_label.grid(row=3, column=4)
 
     adj_temp_label = tk.Label(main_disp, text="Temperature : ")
     adj_temp_label.grid(row=4, column=2)
-    adj_temp_entry = tk.Entry(main_disp)
+    adj_temp_entry = tk.Entry(main_disp, textvariable=adj_temp)
     adj_temp_entry.grid(row=4, column=3)
-    adj_temp = adj_temp_entry.get()
+    adjusted_temp_label = tk.Label(main_disp, text="Adjusted : ")
+    adjusted_temp_label.grid(row=4, column=4)
 
     adj_apply = tk.Button(main_disp, text="APPLY", command=test_adj_value)
     adj_apply.grid(row=5, column=2)
 
 def test_adj_value() :
-    print("Hello world")
 
+    # 3개 중 하나라도 이상치가 나오면 차단
+    if float(adj_flow.get()) < 10 or float(adj_pres.get()) > 21.3 or float(adj_temp.get()) > -162:
+        adjusted_flow = tk.Label(main_disp, textvariable=adj_flow,bg="white", fg="red")
+        adjusted_flow.grid(row=2, column=5)
+        adjusted_pres = tk.Label(main_disp, textvariable=adj_pres, bg="white", fg="red")
+        adjusted_pres.grid(row=3, column=5)
+        adjusted_temp = tk.Label(main_disp, textvariable=adj_temp, bg="white", fg="red")
+        adjusted_temp.grid(row=4, column=5)
+        #interval close : 구간 차단, 펌프 차단
+        cmd = "f"
+        py_serial.write(cmd.encode())
+        time.sleep(0.1)
+    # 3개 모두 정상치라면 다시 정상가동
+    elif float(adj_flow.get()) >= 10 and float(adj_pres.get()) <= 21.3 and float(adj_temp.get()) <= -162 :
+        adjusted_flow = tk.Label(main_disp, textvariable=adj_flow, bg="white", fg="blue")
+        adjusted_flow.grid(row=2, column=5)
+        adjusted_pres = tk.Label(main_disp, textvariable=adj_pres, bg="white", fg="blue")
+        adjusted_pres.grid(row=3, column=5)
+        adjusted_temp = tk.Label(main_disp, textvariable=adj_temp, bg="white", fg="blue")
+        adjusted_temp.grid(row=4, column=5)
+        cmd = "e"
+        py_serial.write(cmd.encode())
+        time.sleep(0.1)
+    # 그외의 모든 조건에서 차단
+    else :
+        cmd = "f"
+        py_serial.write(cmd.encode())
+        time.sleep(0.1)
 
+# 수압, 온도 라벨 업데이트
+def update_pres_temp() :
 
+    global pres_stat_value
+    global temp_stat_value
+
+    pres_stat_value = tk.StringVar()
+    temp_stat_value = tk.StringVar()
+
+    if condition :
+        pres_stat_value.set(round(random.uniform(15,21.3),2))
+        temp_stat_value.set(round(random.uniform(-163,-162),2))
+
+        pres_stat = tk.Label(main_disp, textvariable=pres_stat_value, bg="white", fg="blue")
+        pres_stat.grid(row=0, column=5)
+        temp_stat = tk.Label(main_disp, textvariable=temp_stat_value, bg="white", fg="blue")
+        temp_stat.grid(row=0, column=7)
+
+        main_disp.after(1000,update_pres_temp)
 
 # tkinter GUI 구성
 main_disp = tk.Tk()
 main_disp.title("CONTROL CONSOLE")
-main_disp.geometry("1000x800")
+main_disp.geometry("1000x300")
 main_disp.resizable(True, True)
-
-
-pres_stat_list = []
-temp_stat_list = []
-pres_stat_index = 0
-for value in range(1000) :
-    pres_stat_list.append(round(random.uniform(15,21.3),2))
-    temp_stat_list.append(round(random.uniform(-163,-162),2))
-
-pres_stat_value = tk.StringVar()
-temp_stat_value = tk.StringVar()
-
-for pres_stat_index in range(1000):
-    pres_stat_value.set(pres_stat_list[pres_stat_index])
-    temp_stat_value.set(temp_stat_list[pres_stat_index])
-
-#변수 선언부
-
 
 #Label, Grid
 operation_status_label = tk.Label(main_disp, text="Operation Status :")
 operation_status_label.grid(row=0, column=0)
 
-flow_rate_status_label = tk.Label(main_disp, text="Flow rate : ")
+flow_rate_status_label = tk.Label(main_disp, text="Flow rate(L/M) : ")
 flow_rate_status_label.grid(row=0, column=2)
 
-pressure_status_label = tk.Label(main_disp, text="Pressure : ")
+pressure_status_label = tk.Label(main_disp, text="Pressure(MPa) : ")
 pressure_status_label.grid(row=0, column=4)
-pres_stat = tk.Label(main_disp, textvariable=pres_stat_value, bg="white", fg="blue")
-pres_stat.grid(row=0, column=5)
 
-temp_status_label = tk.Label(main_disp, text="Temperature : ")
+temp_status_label = tk.Label(main_disp, text="Temperature(°C) : ")
 temp_status_label.grid(row=0, column=6)
-temp_stat = tk.Label(main_disp, textvariable=temp_stat_value, bg="white", fg="blue")
-temp_stat.grid(row=0, column=7)
 
 interval_label = tk.Label(main_disp, text="Interval #1 Status : ")
 interval_label.grid(row=1, column=0)
-
 
 #솔레노이드 밸브 #1 : 릴레이 CH2
 valve_1_label = tk.Label(main_disp, text="Valve #1 Status :")
@@ -216,7 +244,6 @@ valve_2_label.grid(row=3, column=0)
 #펌프 : 릴레이 CH4
 pump_label = tk.Label(main_disp, text="Pump Status :")
 pump_label.grid(row=4, column=0)
-
 
 interval_open = tk.Button(main_disp, text="INTERVAL #1 OPEN", command=interval_open)
 interval_open.grid(row=5, column=0)
@@ -242,7 +269,7 @@ testmode_chk = tk.Checkbutton(main_disp, text = "TEST MODE", command=test_mode)
 testmode_chk.grid(row=1, column = 2)
 
 main_disp.after(1000, chk_alltime)
-
+main_disp.after(1000, update_pres_temp)
 
 main_disp.mainloop()
 
